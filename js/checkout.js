@@ -1,6 +1,5 @@
 "use strict";
 
-const STRIPE_PUBLIC_KEY = "";
 const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
 // 顧客が購入する商品

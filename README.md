@@ -24,7 +24,8 @@ Create an account and get an API key.
 - [Stripe Dashboard | API key](https://dashboard.stripe.com/test/apikeys)
 
 Secret key are set to ```.env```.
-```
+
+```bash
 touch .env
 ```
 
@@ -32,8 +33,13 @@ touch .env
 STRIPE_SECRET_KEY=""
 ```
 
-Public key are set to ```js/checkout.js```.
+Public key are set to ```js/env.js```.
+
+```bash
+touch env.js
 ```
+
+```js
 const STRIPE_PUBLIC_KEY = "";
 ```
 
