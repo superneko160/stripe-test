@@ -3,8 +3,8 @@
 const STRIPE_PUBLIC_KEY = "";
 const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
-// The items the customer wants to buy
-const items = [{ id: "xl-tshirt" }];
+// 顧客が購入する商品
+const items = [{ id: "シャツ XLサイズ" }];
 
 let elements;
 
@@ -13,7 +13,10 @@ checkStatus();
 
 document.querySelector("#payment-form").addEventListener("submit", handleSubmit);
 
-// サーバサイドにリクエストを行い新しいPaymentIntentを作成（決済ページが読み込まれたタイミングで作成）
+/**
+ * サーバサイド(create.php)にリクエストを行い新しいPaymentIntentを作成
+ * （決済ページが読み込まれたタイミングで作成）
+ */
 async function initialize() {
     const { clientSecret } = await fetch("create.php", {
         method: "POST",
@@ -33,6 +36,9 @@ async function initialize() {
     paymentElement.mount("#payment-element");
 }
 
+/**
+ * 支払うボタン押下時
+ */
 async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
@@ -40,7 +46,7 @@ async function handleSubmit(e) {
     const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-            // 決済完了後にユーザがリダイレクトするページ
+            // 決済完了後にユーザがリダイレクトするページ（もとのページ）
             return_url: "http://localhost/stripe-test/checkout.html",
             receipt_email: document.getElementById("email").value,
         },
@@ -50,13 +56,15 @@ async function handleSubmit(e) {
     if (error.type === "card_error" || error.type === "validation_error") {
         showMessage(error.message);
     } else {
-        showMessage("An unexpected error occurred.");
+        showMessage("予期せぬエラーが発生しました");
     }
 
     setLoading(false);
 }
 
-// Fetches the payment intent status after payment submission
+/**
+ * 支払後に支払状態のステータスを取得
+ */
 async function checkStatus() {
     const clientSecret = new URLSearchParams(window.location.search).get(
         "payment_intent_client_secret"
@@ -84,26 +92,37 @@ async function checkStatus() {
 
 // ------- UI helpers -------
 
+/**
+ * メッセージを表示
+ * @param {string} messageText 表示メッセ―ジ
+ */
 function showMessage(messageText) {
     const messageContainer = document.querySelector("#payment-message");
 
+    // メッセージの表示
     messageContainer.classList.remove("hidden");
     messageContainer.textContent = messageText;
 
+    // メッセージのクリア
+    // あまりに早くクリアするとメッセージが読み取れないので4秒経過してからクリアしている
     setTimeout(function () {
         messageContainer.classList.add("hidden");
         messageContainer.textContent = "";
     }, 4000);
 }
 
-// Show a spinner on payment submission
+/**
+ * スピナーの表示を制御
+ * @param {bool} isLoading ローディング中の場合true、それ以外の場合false
+ */
 function setLoading(isLoading) {
     if (isLoading) {
-        // Disable the button and show a spinner
+        // ボタンを無効化し、スピナーを表示
         document.querySelector("#submit").disabled = true;
         document.querySelector("#spinner").classList.remove("hidden");
         document.querySelector("#button-text").classList.add("hidden");
     } else {
+        // ボタンを有効化し、スピナーを非表示
         document.querySelector("#submit").disabled = false;
         document.querySelector("#spinner").classList.add("hidden");
         document.querySelector("#button-text").classList.remove("hidden");

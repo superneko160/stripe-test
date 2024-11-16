@@ -10,7 +10,7 @@ $stripe = new \Stripe\StripeClient($_ENV["STRIPE_SECRET_KEY"]);
 header('Content-Type: application/json');
 
 try {
-    // retrieve JSON from POST body
+    // POSTされたJSONデータ取得
     $jsonStr = file_get_contents('php://input');
     $jsonObj = json_decode($jsonStr);
 

@@ -6,12 +6,12 @@ Stripe Payment Demo
   
 ```
 php -v
-8.2.4
+8.2.12
 ```
 
 ```
 composer -v
-Composer version 2.6.5
+Composer version 2.7.6
 ```
 
 # SetUp
