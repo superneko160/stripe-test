@@ -2,28 +2,28 @@
 
 Stripe Payment Demo
 
-# Versions
+## Versions
   
-```
+```bash
 php -v
 8.2.12
 ```
 
-```
+```bash
 composer -v
 Composer version 2.7.6
 ```
 
-# SetUp
+## SetUp
 
-```
+```bash
 composer install
 ```
 
 Create an account and get an API key.  
 - [Stripe Dashboard | API key](https://dashboard.stripe.com/test/apikeys)
 
-Secret key are set to ```.env```.
+Secret key are set to `.env`.
 
 ```bash
 touch .env
@@ -33,7 +33,7 @@ touch .env
 STRIPE_SECRET_KEY=""
 ```
 
-Public key are set to ```js/env.js```.
+Public key are set to `js/env.js`.
 
 ```bash
 touch env.js
@@ -43,15 +43,15 @@ touch env.js
 const STRIPE_PUBLIC_KEY = "";
 ```
 
-# Access
+## Access
 
 ```
 http://localhost/stripe-test/checkout.html
 ```
 
-# Test cards
+## Test cards
 To simulate successful payments, use the test cards listed in the [stripe DOCS](https://stripe.com/docs/testing?locale=ja-JP).
 
 
-# Reference
+## Reference
 - [Quick Start | stripe DOCS](https://stripe.com/docs/payments/quickstart)
