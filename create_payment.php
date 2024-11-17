@@ -1,5 +1,8 @@
 <?php
 require_once 'vendor/autoload.php';
+require_once 'Logger/Logger.php';
+
+const PAYMENT_LOG = 'log/create_payment.log';
 
 // アプリケーションの実行
 handlePaymentRequest();
@@ -38,7 +41,6 @@ function handlePaymentRequest(): void {
 
 /**
  * アプリケーションの初期化
- * @throws RuntimeException
  */
 function initializeApplication(): void {
     header('Content-Type: application/json');
@@ -54,7 +56,7 @@ function loadEnvironmentVariables(): void {
     $dotenv->load();
 
     if (!isset($_ENV['STRIPE_SECRET_KEY'])) {
-        throw new RuntimeException('Stripeのシークレットキーが未設定です。.envファイルに設定してください');
+        throw new RuntimeException(__FUNCTION__ . ':Stripeのシークレットキーが未設定です。.envファイルに設定してください');
     }
 }
 
@@ -67,6 +69,9 @@ function loadEnvironmentVariables(): void {
 function calculateOrderAmount(array $items): int {
     $total = 0;
     foreach($items as $item) {
+        if ($item->amount === 0 || $item->quantity === 0) {
+            throw new InvalidArgumentException(__FUNCTION__ . ':商品の金額か量に0が設定されています');
+        }
       $total += $item->amount * $item->quantity;
     }
     return $total;
@@ -78,6 +83,7 @@ function calculateOrderAmount(array $items): int {
  * @param Exception $e
  */
 function handleError(Exception $e): void {
+    Logger::dumpLog(PAYMENT_LOG, date('Y/m/d H:i:s') . ' '. $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
