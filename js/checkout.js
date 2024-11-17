@@ -2,8 +2,21 @@
 
 const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
-// 顧客が購入する商品
-const items = [{ id: "シャツ XLサイズ" }];
+// 顧客が購入する商品（ダミーデータ）
+const items = [
+    {
+        id: "A001",
+        name: "シャツ Lサイズ" ,
+        amount: 500,
+        quantity: 2
+    },
+    {
+        id: "F732",
+        name: "電子キーボード" ,
+        amount: 16000,
+        quantity: 1
+    }
+];
 
 let elements;
 
@@ -40,6 +53,8 @@ async function initialize() {
  */
 async function handleSubmit(e) {
     e.preventDefault();
+
+    // スピナー表示
     setLoading(true);
 
     const { error } = await stripe.confirmPayment({
@@ -58,6 +73,7 @@ async function handleSubmit(e) {
         showMessage("予期せぬエラーが発生しました");
     }
 
+    // スピナー非表示
     setLoading(false);
 }
 
@@ -103,11 +119,11 @@ function showMessage(messageText) {
     messageContainer.textContent = messageText;
 
     // メッセージのクリア
-    // あまりに早くクリアするとメッセージが読み取れないので4秒経過してからクリアしている
+    // あまりに早くクリアするとメッセージが読み取れないので5秒経過してからクリア
     setTimeout(function () {
         messageContainer.classList.add("hidden");
         messageContainer.textContent = "";
-    }, 4000);
+    }, 5000);
 }
 
 /**
