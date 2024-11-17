@@ -1,3 +1,4 @@
 .env
 js/env.js
 vendor/*
+log/create_payment.log

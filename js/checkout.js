@@ -1,5 +1,10 @@
 "use strict";
 
+// バックエンド処理先
+const PAYMENT_URL = "create_payment.php";
+// 決済完了後に遷移するページ（もとのページ）
+const COMPLETE_URL = "http://localhost/stripe-test/checkout.html";
+
 const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
 // 顧客が購入する商品（ダミーデータ）
@@ -26,11 +31,11 @@ checkStatus();
 document.querySelector("#payment-form").addEventListener("submit", handleSubmit);
 
 /**
- * サーバサイド(create.php)にリクエストを行い新しいPaymentIntentを作成
+ * サーバサイドにリクエストを行い新しいPaymentIntentを作成
  * （決済ページが読み込まれたタイミングで作成）
  */
 async function initialize() {
-    const { clientSecret } = await fetch("create.php", {
+    const { clientSecret } = await fetch(PAYMENT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),
@@ -60,8 +65,8 @@ async function handleSubmit(e) {
     const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-            // 決済完了後にユーザがリダイレクトするページ（もとのページ）
-            return_url: "http://localhost/stripe-test/checkout.html",
+            // 決済完了後にユーザがリダイレクトするページ
+            return_url: COMPLETE_URL,
             receipt_email: document.getElementById("email").value,
         },
     });
@@ -81,6 +86,7 @@ async function handleSubmit(e) {
  * 支払後に支払状態のステータスを取得
  */
 async function checkStatus() {
+    // URLに決済状況が付与されるので取得する
     const clientSecret = new URLSearchParams(window.location.search).get(
         "payment_intent_client_secret"
     );
@@ -132,12 +138,12 @@ function showMessage(messageText) {
  */
 function setLoading(isLoading) {
     if (isLoading) {
-        // ボタンを無効化し、スピナーを表示
+        // 支払いボタンを無効化し、スピナーを表示
         document.querySelector("#submit").disabled = true;
         document.querySelector("#spinner").classList.remove("hidden");
         document.querySelector("#button-text").classList.add("hidden");
     } else {
-        // ボタンを有効化し、スピナーを非表示
+        // 支払いボタンを有効化し、スピナーを非表示
         document.querySelector("#submit").disabled = false;
         document.querySelector("#spinner").classList.add("hidden");
         document.querySelector("#button-text").classList.remove("hidden");
