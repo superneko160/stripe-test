@@ -2,6 +2,10 @@
 require_once 'vendor/autoload.php';
 require_once 'Logger/Logger.php';
 
+use Dotenv\Dotenv;
+use Stripe\StripeClient;
+use Stripe\PaymentIntent;
+
 const PAYMENT_LOG = 'log/create_payment.log';
 
 // アプリケーションの実行
@@ -11,29 +15,11 @@ handlePaymentRequest();
  * アプリケーションのメインプロセス
  */
 function handlePaymentRequest(): void {
-    initializeApplication();
-
-    $stripe = new \Stripe\StripeClient($_ENV['STRIPE_SECRET_KEY']);
-
     try {
-        // POSTされたJSONデータ取得
-        $requestDataStr = file_get_contents('php://input');
-        // POSTされたJSONデータが文字列になっているのでオブジェクトに変換
-        $requestData = json_decode($requestDataStr);
-
-        // PaymentIntentの作成
-        $paymentIntent = $stripe->paymentIntents->create([
-            'amount' => calculateOrderAmount($requestData->items),
-            'currency' => 'jpy',
-            'automatic_payment_methods' => [
-                'enabled' => true,
-            ],
-        ]);
-
-        // レスポンス
-        echo json_encode([
-            'clientSecret' => $paymentIntent->client_secret,
-        ]);
+        initializeApplication();
+        $requestData = getRequestData();
+        $response = processPayment($requestData);
+        sendResponse($response);
     } catch (Exception $e) {
         handleError($e);
     }
@@ -52,12 +38,66 @@ function initializeApplication(): void {
  * @throws RuntimeException
  */
 function loadEnvironmentVariables(): void {
-    $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv = Dotenv::createImmutable(__DIR__);
     $dotenv->load();
 
     if (!isset($_ENV['STRIPE_SECRET_KEY'])) {
         throw new RuntimeException(__FUNCTION__ . ':Stripeのシークレットキーが未設定です。.envファイルに設定してください');
     }
+}
+
+/**
+ * リクエストデータの取得と検証
+ * @return array 返還後リクエストデータ
+ * @throws InvalidArgumentException
+ */
+function getRequestData(): array {
+    // POSTされたJSONデータ取得
+    $requestDataStr = file_get_contents('php://input');
+    // POSTされたJSONデータが文字列になっているのでオブジェクトに変換
+    $requestData = json_decode($requestDataStr);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new InvalidArgumentException(__FUNCTION__ . ':無効なJSONデータです');
+    }
+
+    return (array)$requestData;
+}
+
+/**
+ * 支払い処理の実行
+ * @param array $requestData
+ * @return array
+ * @throws Exception
+ */
+function processPayment(array $requestData): array {
+    try {
+        $stripe = new StripeClient($_ENV['STRIPE_SECRET_KEY']);
+        $amount = calculateOrderAmount($requestData['items']);
+        $paymentIntent = createPaymentIntent($stripe, $amount);
+
+        return [
+            'clientSecret' => $paymentIntent->client_secret
+        ];
+    } catch (Exception $e) {
+        throw new Exception(__FUNCTION__ . ':支払いプロセスでの失敗 ' . $e->getMessage());
+    }
+}
+
+/**
+ * PaymentIntentの作成
+ * @param StripeClient $stripe
+ * @param int $amount 注文金額
+ * @return PaymentIntent
+ */
+function createPaymentIntent(StripeClient $stripe, int $amount): PaymentIntent {
+    return $stripe->paymentIntents->create([
+        'amount' => $amount,
+        'currency' => 'jpy',
+        'automatic_payment_methods' => [
+            'enabled' => true,
+        ],
+    ]);
 }
 
 /**
@@ -75,6 +115,14 @@ function calculateOrderAmount(array $items): int {
       $total += $item->amount * $item->quantity;
     }
     return $total;
+}
+
+/**
+ * レスポンスの送信
+ * @param array $data
+ */
+function sendResponse(array $data): void {
+    echo json_encode($data);
 }
 
 /**
