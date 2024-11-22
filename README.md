@@ -36,7 +36,7 @@ STRIPE_SECRET_KEY=""
 Public key are set to `js/env.js`.
 
 ```bash
-touch env.js
+touch js/env.js
 ```
 
 ```js
