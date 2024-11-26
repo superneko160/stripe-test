@@ -1,3 +1,11 @@
+<?php
+// セッションでデータを受け取ったとする
+$data = [
+    "amount1" => 2400,
+    "amount2" => 7200,
+    "amount3" => 13000,
+]
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -8,6 +16,10 @@
     <link rel="stylesheet" href="css/checkout.css" />
     <script src="https://js.stripe.com/v3/"></script>
     <script src="js/env.js" defer></script>
+    <script>
+        'use strict';
+        const items = <?=json_encode($data)?>
+    </script>
     <script src="js/checkout.js" defer></script>
 </head>
 <body>

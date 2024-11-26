@@ -3,25 +3,25 @@
 // バックエンド処理先
 const PAYMENT_URL = "create_payment.php";
 // 決済完了後に遷移するページ（もとのページ）
-const COMPLETE_URL = "http://localhost/stripe-test/checkout.html";
+const COMPLETE_URL = "http://localhost/stripe-test/checkout.php";
 
 const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
 // 顧客が購入する商品（ダミーデータ）
-const items = [
-    {
-        id: "A001",
-        name: "シャツ Lサイズ" ,
-        amount: 500,
-        quantity: 2
-    },
-    {
-        id: "F732",
-        name: "電子キーボード" ,
-        amount: 16000,
-        quantity: 1
-    }
-];
+// const items = [
+//     {
+//         id: "A001",
+//         name: "シャツ Lサイズ" ,
+//         amount: 500,
+//         quantity: 2
+//     },
+//     {
+//         id: "F732",
+//         name: "電子キーボード" ,
+//         amount: 16000,
+//         quantity: 1
+//     }
+// ];
 
 let elements;
 

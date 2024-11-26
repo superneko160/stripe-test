@@ -55,13 +55,15 @@ function getRequestData(): array {
     // POSTされたJSONデータ取得
     $requestDataStr = file_get_contents('php://input');
     // POSTされたJSONデータが文字列になっているのでオブジェクトに変換
-    $requestData = json_decode($requestDataStr);
+    $requestData = json_decode($requestDataStr, true);
+    // Logger::dumpLog(PAYMENT_LOG, $requestData['items']['amount1']);
+    // exit();
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new InvalidArgumentException(__FUNCTION__ . ':無効なJSONデータです');
     }
 
-    return (array)$requestData;
+    return $requestData;
 }
 
 /**
@@ -109,10 +111,10 @@ function createPaymentIntent(StripeClient $stripe, int $amount): PaymentIntent {
 function calculateOrderAmount(array $items): int {
     $total = 0;
     foreach($items as $item) {
-        if ($item->amount === 0 || $item->quantity === 0) {
+        if ($item < 0) {
             throw new InvalidArgumentException(__FUNCTION__ . ':商品の金額か量に0が設定されています');
         }
-      $total += $item->amount * $item->quantity;
+      $total += $item;
     }
     return $total;
 }
